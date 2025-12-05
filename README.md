@@ -17,7 +17,7 @@ requirements:
 
 3. Support the colour selector to adjust the particle colour
 
-4. Particles need to respond to gesture changes in real time. The interface is simple and modern.
+4. Particles need to respond to gesture changes in real time.
 
 5. The interface is simple and modern
 
