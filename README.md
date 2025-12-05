@@ -3,7 +3,7 @@
 Built with Gemini Deepmind 
 (using Three.js)
 
-insipration: EHuanglu (https://x.com/EHuanglu)
+insipration: [EHuanglu](https://x.com/EHuanglu/status/1995511733138710785)
 
 ## PROMPT ✨ :
 
