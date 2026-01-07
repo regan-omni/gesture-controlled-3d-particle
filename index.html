@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gesture Particles: Dimension</title>
+    <title>Gesture Particles: Lost in Space</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;500&display=swap');
 
         :root {
-            --glass-bg: rgba(10, 5, 20, 0.6); /* Darker glass for mystery vibe */
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --primary: #9d4edd; /* Lighter purple for UI highlights */
+            --glass-bg: rgba(10, 10, 15, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --primary: #9d4edd;
             --text-main: rgba(255, 255, 255, 0.9);
             --text-muted: rgba(255, 255, 255, 0.5);
         }
@@ -24,23 +24,6 @@
             user-select: none;
         }
 
-        /* --- MYSTERIOUS BACKGROUND ANIMATION --- */
-        .background-fx {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            z-index: 0;
-            background: linear-gradient(125deg, #000000 0%, #1a0b2e 30%, #0f0518 70%, #000000 100%);
-            background-size: 300% 300%;
-            animation: dimensionShift 20s ease infinite;
-        }
-
-        @keyframes dimensionShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
         #canvas-container {
             position: absolute;
             width: 100vw;
@@ -48,15 +31,13 @@
             z-index: 1;
         }
 
-        /* Mirrored video display (Hidden logic) */
+        /* Video must exist for AI, but we hide it completely */
         #input-video {
             position: absolute;
-            top: 0; left: 0;
-            width: 320px; height: 240px;
+            width: 1px; height: 1px;
             opacity: 0;
-            z-index: -1;
             pointer-events: none;
-            transform: scaleX(-1); 
+            z-index: -9999;
         }
 
         /* UI Dock */
@@ -166,7 +147,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: opacity 1.5s; /* Slow fade for effect */
+            transition: opacity 1.5s;
         }
         .spinner {
             width: 40px; height: 40px;
@@ -191,24 +172,24 @@
 </head>
 <body>
 
-    <div class="background-fx"></div>
-
     <div id="loader">
         <div class="spinner"></div>
-        <div style="font-size: 12px; letter-spacing: 2px; color: #666;">ENTERING DIMENSION...</div>
+        <div style="font-size: 12px; letter-spacing: 2px; color: #666;">ENTERING DEEP SPACE...</div>
     </div>
 
+    <!-- Hidden video for AI logic -->
     <video id="input-video" autoplay playsinline></video>
+    
     <div id="canvas-container"></div>
 
     <div id="ui-dock">
         <div class="dock-section">
             <div class="dock-label">Shape</div>
             <div class="shape-selector">
-                <button class="btn active" data-shape="heart">Heart</button>
+                <button class="btn active" data-shape="helmet">Helmet</button>
                 <button class="btn" data-shape="saturn">Saturn</button>
                 <button class="btn" data-shape="fireworks">Fireworks</button>
-                <button class="btn" data-shape="spiral">Galaxy</button>
+                <button class="btn" data-shape="andromeda">Andromeda</button>
                 <button class="btn" data-shape="dna">DNA</button>
             </div>
         </div>
@@ -216,7 +197,6 @@
         <div class="dock-section">
             <div class="dock-label">Color</div>
             <div class="color-wrapper">
-                <!-- REQUEST: Start with #662C90 -->
                 <input type="color" id="color-picker" value="#662C90">
             </div>
         </div>
@@ -238,9 +218,8 @@
         const config = {
             particleCount: 20000,
             baseSize: 0.35,
-            // REQUEST: Start with specific Hex
             color: new THREE.Color('#662C90'),
-            shape: 'heart'
+            shape: 'helmet'
         };
 
         const state = {
@@ -255,14 +234,12 @@
             handCount: 0
         };
 
-        // --- THREE.JS ---
+        // --- THREE.JS SCENE ---
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
-        // Remove standard black fog, let CSS background shine through, 
-        // but keep slight fog for depth
-        scene.fog = new THREE.FogExp2(0x050210, 0.002);
+        scene.fog = new THREE.FogExp2(0x000000, 0.001); // Very light fog for deep space
 
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
         camera.position.z = 30;
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -270,7 +247,31 @@
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         container.appendChild(renderer.domElement);
 
-        // --- PARTICLES ---
+        // --- BACKGROUND STARFIELD ("Lost in Space") ---
+        const starCount = 6000;
+        const starGeo = new THREE.BufferGeometry();
+        const starPos = new Float32Array(starCount * 3);
+        
+        for(let i = 0; i < starCount * 3; i+=3) {
+            starPos[i] = (Math.random() - 0.5) * 600; // Wide X
+            starPos[i+1] = (Math.random() - 0.5) * 600; // Wide Y
+            starPos[i+2] = (Math.random() - 0.5) * 600 - 100; // Deep Z
+        }
+        
+        starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+        
+        const starMat = new THREE.PointsMaterial({
+            size: 0.5,
+            color: 0xffffff,
+            transparent: true,
+            opacity: 0.6,
+            sizeAttenuation: true
+        });
+        
+        const starSystem = new THREE.Points(starGeo, starMat);
+        scene.add(starSystem);
+
+        // --- MAIN PARTICLES ---
         const geometry = new THREE.BufferGeometry();
         const positions = new Float32Array(config.particleCount * 3);
         const targetPositions = new Float32Array(config.particleCount * 3);
@@ -313,11 +314,33 @@
             const set = (x,y,z) => { if(idx<pos.length){ pos[idx++]=x; pos[idx++]=y; pos[idx++]=z; }};
             const cnt = config.particleCount;
 
-            if (name === 'heart') {
+            // SHAPE 1: ASTRONAUT HELMET (Replaces Heart)
+            if (name === 'helmet') {
                 for(let i=0; i<cnt; i++){
-                    const t = Math.random()*Math.PI*2;
-                    const x=16*Math.pow(Math.sin(t),3), y=13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t), z=(Math.random()-0.5)*5;
-                    set(x*0.8, y*0.8, z);
+                    const u = Math.random();
+                    const v = Math.random();
+                    const theta = 2 * Math.PI * u;
+                    const phi = Math.acos(2 * v - 1);
+                    
+                    const r = 7; // Helmet Radius
+                    let x = r * Math.sin(phi) * Math.cos(theta);
+                    let y = r * Math.sin(phi) * Math.sin(theta);
+                    let z = r * Math.cos(phi);
+
+                    // Flatten front for visor
+                    if(z > 2 && Math.abs(x) < 5 && Math.abs(y) < 5) {
+                        z = 2 + (Math.random() * 0.5); // Visor glass
+                    }
+                    
+                    // Neck opening
+                    if (y < -4) {
+                       // Scale bottom in to form neck
+                       const neckFactor = 0.7;
+                       x *= neckFactor;
+                       z *= neckFactor;
+                    }
+
+                    set(x, y, z);
                 }
             } 
             else if (name === 'saturn') {
@@ -336,19 +359,27 @@
                     set(r*Math.sin(p)*Math.cos(t), r*Math.sin(p)*Math.sin(t), r*Math.cos(p));
                 }
             }
-            else if (name === 'spiral') {
-                const arms = 4;
+            // SHAPE 4: ANDROMEDA (Replaces Spiral)
+            else if (name === 'andromeda') {
                 for(let i=0; i<cnt; i++){
-                    const armIndex = i % arms;
-                    const offset = (Math.PI * 2 / arms) * armIndex;
-                    const r = Math.random() * 12;
-                    const spin = r * 0.5;
-                    const angle = offset + spin;
-                    const spread = (Math.random() - 0.5) * (r * 0.3); 
-                    const x = (r * Math.cos(angle)) + spread;
-                    const z = (r * Math.sin(angle)) + spread;
-                    const y = (Math.random() - 0.5) * (Math.max(0.5, 6 - r * 0.5)); 
-                    set(x, y, z);
+                    // Elliptical Spiral
+                    const angle = Math.random() * Math.PI * 8; // Many turns
+                    const radius = Math.random() * 12;
+                    
+                    // Squish one axis for tilted disk effect
+                    const x = (radius * Math.cos(angle)) * 1.5; // Wider
+                    const z = (radius * Math.sin(angle)) * 0.8; // Narrower (elliptical)
+                    
+                    // Vertical spread decreases as we go out (bulge in center)
+                    const yDist = Math.max(0.2, 3 - radius * 0.25);
+                    const y = (Math.random() - 0.5) * yDist;
+
+                    // Rotate the whole galaxy on Z axis for the classic diagonal look
+                    const tilt = 0.5; // radians
+                    const finalX = x * Math.cos(tilt) - y * Math.sin(tilt);
+                    const finalY = x * Math.sin(tilt) + y * Math.cos(tilt);
+
+                    set(finalX, finalY, z);
                 }
             }
             else if (name === 'dna') {
@@ -357,17 +388,14 @@
                     const angle = h * 0.8; 
                     const r = 4;
                     const strand = Math.random() > 0.5 ? 0 : Math.PI;
-                    const spreadX = (Math.random() - 0.5) * 1.5;
-                    const spreadY = (Math.random() - 0.5) * 1.5;
-                    const spreadZ = (Math.random() - 0.5) * 1.5;
-                    const x = r * Math.cos(angle + strand) + spreadX;
-                    const z = r * Math.sin(angle + strand) + spreadZ;
-                    const y = h + spreadY;
+                    const x = r * Math.cos(angle + strand) + (Math.random()-0.5);
+                    const z = r * Math.sin(angle + strand) + (Math.random()-0.5);
+                    const y = h + (Math.random()-0.5);
                     set(x, y, z);
                 }
             }
         }
-        updateShape('heart');
+        updateShape('helmet');
 
         // --- VISION ---
         const video = document.getElementById('input-video');
@@ -421,7 +449,7 @@
                 if (state.handCount === 0) {
                     state.targetScale = 1.0;
                     state.targetRotX = 0; state.targetRotY = 0; state.targetRotZ = 0;
-                    statusText.innerText = "Waiting for hands...";
+                    statusText.innerText = "Drifting...";
                 } 
                 else if (state.handCount === 1) {
                     // ONE HAND
@@ -432,8 +460,7 @@
 
                     const cx = lm[9].x; const cy = lm[9].y;
                     
-                    // REQUEST: Less sensitive, smoother transition
-                    // Reduced multiplier from 3.0 to 1.5 to prevent flipping upside down
+                    // Low Sensitivity
                     state.targetRotY = -(cx - 0.5) * 1.5; 
                     state.targetRotX = (cy - 0.5) * 1.0; 
                     state.targetRotZ = 0;
@@ -450,7 +477,6 @@
 
                     const cx = (h1.x + h2.x) / 2; const cy = (h1.y + h2.y) / 2;
                     
-                    // REQUEST: Less sensitive
                     state.targetRotY = -(cx - 0.5) * 1.5; 
                     state.targetRotX = (cy - 0.5) * 1.0;
                     
@@ -488,8 +514,19 @@
             const dt = clock.getDelta();
             const time = clock.getElapsedTime();
 
-            // REQUEST: Smoother transition (Heavy damping)
-            // Reduced interpolation speed from 4.0 to 2.0
+            // 1. Animate Background (Starfield Warp)
+            const starPos = starSystem.geometry.attributes.position.array;
+            for(let i=2; i<starPos.length; i+=3) {
+                starPos[i] += 2; // Move stars towards camera
+                if (starPos[i] > 100) {
+                    starPos[i] = -500; // Reset to back
+                }
+            }
+            starSystem.geometry.attributes.position.needsUpdate = true;
+            // Slowly rotate background container for extra disorientation
+            starSystem.rotation.z = time * 0.02;
+
+            // 2. Main Particle Physics
             const speed = 2.0 * dt;
             
             state.currentScale += (state.targetScale - state.currentScale) * speed;
@@ -499,7 +536,6 @@
 
             particles.scale.setScalar(state.currentScale);
             
-            // Base rotation + Gesture rotation
             particles.rotation.y = (time * 0.08) + state.currentRotY; 
             particles.rotation.x = state.currentRotX;
             particles.rotation.z = state.currentRotZ;
