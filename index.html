@@ -41,7 +41,7 @@
         }
 
         /* UI Dock */
-        #ui-dock {
+        #ui-dock, .instruction-container {
             position: absolute;
             bottom: 40px; 
             left: 50%;
@@ -61,6 +61,14 @@
             gap: 25px;
             box-shadow: 0 15px 40px rgba(0,0,0,0.8);
             transition: transform 0.2s;
+        }
+
+        .instruction-container {
+            bottom: unset;
+            top: 40px;
+            background: linear-gradient(45deg, #5900a2, #000);
+            border: 1px solid #5900a2;
+            text-transform: uppercase;
         }
 
         .dock-section {
@@ -178,6 +186,11 @@
     </div>
 
     <video id="input-video" autoplay playsinline></video>
+
+    <div class="istruction-container">
+        <div>Place one or both hands in front of the camera to start</div>
+    </div>
+    
     <div id="canvas-container"></div>
 
     <div id="ui-dock">
